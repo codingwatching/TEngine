@@ -12,11 +12,14 @@ from .domains import dependencies, export_script, load_module
 def browser(run):
     dependencies("playwright")
     module = load_module("workflow_html_baker", run.context.project / ".codex/skills/html-to-ugui/scripts/bake_html_to_json.py")
-    root = run.path / "browser fixture"
+    root = run.path / "browser fixture \u4e2d\u6587"
     root.mkdir()
     (root / "pixel.png").write_bytes(base64.b64decode(
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII="))
     fonts = list((run.context.project / "Assets").rglob("*.ttf"))
+    if not fonts:
+        font_root = Path(os.environ["WINDIR"]) / "Fonts" if os.name == "nt" and "WINDIR" in os.environ else Path("/usr/share/fonts")
+        fonts = sorted(path for path in font_root.rglob("*") if path.suffix.lower() in (".ttf", ".otf"))
     if not fonts:
         blocked("No local font available for the browser regression.")
     shutil.copyfile(fonts[0], root / "fixture.ttf")
@@ -66,7 +69,7 @@ def luban(run):
     fixture = run.context.project / ".codex/skills/luban-dev/examples/regression"
     results = []
     for mode in ("standard", "lazyload"):
-        repo = run.path / ("luban fixture " + mode)
+        repo = run.path / ("luban fixture \u4e2d\u6587 " + mode)
         config = repo / "Configs/GameConfig"
         shutil.copytree(fixture, config)
         shutil.copytree(run.context.repo / "Configs/GameConfig/CustomTemplate", config / "CustomTemplate")
@@ -82,7 +85,7 @@ def luban(run):
         names = {path.stem.lower() for path in binaries}
         expected = ({"tbnormal", "tbrange", "tbcount", "tbfield"} if mode == "standard" else
                     {"tbnormal", "tbrange__p_0", "tbrange__p_1", "tbrange__p_2",
-                     "tbcount__p_0", "tbcount__p_1", "tbcount__index", "tbfield__p_1", "tbfield__p_2"})
+                     "tbcount__p_0000", "tbcount__p_0001", "tbcount__index", "tbfield__p_1", "tbfield__p_2"})
         if names != expected or any(path.stat().st_size == 0 for path in binaries):
             raise WorkflowError(f"{mode} unexpected binary outputs: {sorted(names)}")
         code = output / "GameScripts/HotFix/GameProto"
